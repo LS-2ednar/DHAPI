@@ -2,10 +2,10 @@
 This is a work in progress API for Daggerheats SRD content. 
 
 # Current Development step
-- [] Extract all SRD information and compile it into useful information
-- [] Learn FastAPI to create the API
-- [] Create Differennt Endpoints for all the Content
-- [] Other magical challanges which will rise as soon as I notice them.
+- [ ] Extract all SRD information and compile it into useful information
+- [ ] Learn FastAPI to create the API
+- [ ] Create Differennt Endpoints for all the Content
+- [ ] Other magical challanges which will rise as soon as I notice them.
 
 # Potential Features
 - Access information about different CARDs
