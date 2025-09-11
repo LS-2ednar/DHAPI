@@ -8,8 +8,26 @@ def find_srd():
         if os.path.isfile(item) and ".pdf" in item:
             print(f"SRD Document to use: {item}")
             return item
+
+def extract_domain_cards(srd):
+
+    domain_cards = {}
+
+    page_reference_count = -1
+    reader = PdfReader(srd)
+    for page in reader.pages:
+        page_reference_count += 1
+        if "This section contains additional information and reference sheets/period.tab\nDomain Card reference" in page.extract_text():
+            first_page_count = page_reference_count
+            print(page_reference_count)
+        
     
-def read_srd(srd):
+    #Firstpage is different then following pages therefore considered as a special case.
+    domaincard_page = reader.pages[first_page_count].extract_text().split("Domain Card reference\n")[1]
+    print(domaincard_page) ### <---- CONTINUE HERE Extract Data from the page and repeat until the page_refernce_count is reached###
+    
+
+def read_srd_contents(srd):
     # extract the contents of the SRD
     reader = PdfReader(srd)
     for page in reader.pages:
@@ -22,7 +40,6 @@ def read_srd(srd):
         if ".tnum" in line:
             #print(" ".join(line.replace(".","").split()))
             tnum_to_int(" ".join(line.replace(".","").split()))
-
 
 def tnum_to_int(tnum):
     #replace all wrong 
@@ -53,6 +70,7 @@ def tnum_to_int(tnum):
 
 def extract_srd():
     srd = find_srd()
-    read_srd(srd)
+    extract_domain_cards(srd)
+    #read_srd_contents(srd)
 
 extract_srd()
