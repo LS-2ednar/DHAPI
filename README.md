@@ -12,6 +12,10 @@ This is a work in progress API for Daggerheats SRD content.
 - Differen Advesaries
 - Rules
 
+# How to use this Project:
+1. Visit https://www.daggerheart.com/srd/ and get the Daggerheart SRD by clicking on  DOWNLOAD THE DAGGERHEART SRD and put the downloaded document into the root of this project.
+2. Do something
+
 # How this project was created
 I realized that there is no API available for Daggerheart content, which is why I thoght it might help me and other friends of the game. Plus i wanted an excuse to combine two of my hobbies DH and Programming.
 
