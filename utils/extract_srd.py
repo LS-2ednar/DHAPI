@@ -6,7 +6,7 @@ def find_srd():
     cwd = os.getcwd()
     for item in os.listdir(cwd):
         if os.path.isfile(item) and ".pdf" in item:
-            print(f"SRD Document to use: {item}")
+            print(f"SRD Document to use: {item}\n")
             return item
 
 def extract_domain_cards(srd):
@@ -18,14 +18,26 @@ def extract_domain_cards(srd):
     for page in reader.pages:
         page_reference_count += 1
         if "This section contains additional information and reference sheets/period.tab\nDomain Card reference" in page.extract_text():
-            first_page_count = page_reference_count
-            print(page_reference_count)
+            page_count = page_reference_count
+            print(f"Number of Pages: {page_reference_count}\n")
         
     
     #Firstpage is different then following pages therefore considered as a special case.
-    domaincard_page = reader.pages[first_page_count].extract_text().split("Domain Card reference\n")[1]
-    print(domaincard_page) ### <---- CONTINUE HERE Extract Data from the page and repeat until the page_refernce_count is reached###
-    
+    domaincard_page = reader.pages[page_count].extract_text().split("Domain Card reference\n")[1]
+    while page_count < len(reader.pages)-1:
+        print(domaincard_page) ### <---- CONTINUE HERE Extract Data from the page and repeat until the page_refernce_count is reached###
+
+        """
+        Pseudo Code:
+        1. Ignore " " lines
+        2. Ignore "Domain" Lines
+        3. All CAPs -> DOMAIN CARD NAME
+        4. If "Level" in Line -> Level, Domain & Type
+        5. Unitl Next all CAPs -> Text for this Domain Card 
+        """
+
+        page_count += 1
+        domaincard_page = reader.pages[page_count].extract_text()
 
 def read_srd_contents(srd):
     # extract the contents of the SRD
