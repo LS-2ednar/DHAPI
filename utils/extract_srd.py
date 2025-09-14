@@ -49,23 +49,25 @@ def extract_domain_cards(srd):
         def card_text_refresher(text):
 
             cleaned_numbers = text.replace("/one.tnum","1").replace("/two.tnum","2").replace("/three.tnum","3").replace("/four.tnum","4").replace("/five.tnum","5").replace("/six.tnum","6").replace("/seven.tnum","7").replace("/eight.tnum","8").replace("/nine.tnum","9").replace("/zero.tnum","0")
-            cleaned_punctuations = cleaned_numbers.replace("/comma.tab",",").replace("/period.tab",".")
-            cleaned_text = cleaned_punctuations.replace("/uni00A0"," ")
+            cleaned_punctuations = cleaned_numbers.replace("/comma.tab",",").replace("/period.tab",".").replace("/hyphen.tab","-")
+            cleaned_text = cleaned_punctuations.replace("/uni00A0"," ").replace("        ","")
             return cleaned_text
 
         CARD_TEXT = ""
         for line in domaincard_page.split("\n"):
 
+            """
             #lines to ignore
             if "SRD" in line or "DOMAIN" in line:
                 print("IGNORED LINE -> DOMAIN or SRD")
                 continue
+            """
 
             #identify domaincard name
-            if line.isupper():
+            if line.isupper() or "/hyphen.tab" in line:
                 print(f"CARDTEXT:\n{card_text_refresher(CARD_TEXT)}")
-                print(f"DOMAINCARD NAME LINE:{line.capitalize()}")
-                CARDNAME = line.capitalize()
+                print(f"\nDOMAINCARD NAME LINE:{line.capitalize()}")
+                CARDNAME = card_text_refresher(line.capitalize())
                 CARD_TEXT = ""
                 continue
 
@@ -83,7 +85,7 @@ def extract_domain_cards(srd):
                 continue
 
             # update cardtext
-            CARD_TEXT += line 
+            CARD_TEXT += line
 
             # hacky way of writing the contents to the dict -> is updated multiple times
             if DOMAIN not in domain_cards:
@@ -94,7 +96,10 @@ def extract_domain_cards(srd):
         page_count += 1
         domaincard_page = reader.pages[page_count].extract_text()
 
-    print(domain_cards)
+    
+    for domain in domain_cards:
+        print(len(domain_cards[domain]))
+    print(domain_cards["Arcana"])
     return domain_cards
 
 def read_srd_contents(srd):
@@ -140,7 +145,8 @@ def read_srd_contents(srd):
 
 def extract_srd():
     srd = find_srd()
-    extract_domain_cards(srd)
+    extract_domain_cards(srd) # <--- We need to double check for MIDNIGHT-TOUCHED / GRACE-TOUCHED <- Approach... first clean SRD then continue? I do not know
+    #extract_acestries(srd) <--- Next to do
     #read_srd_contents(srd)
 
 extract_srd()
