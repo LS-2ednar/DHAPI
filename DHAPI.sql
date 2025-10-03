@@ -16,40 +16,87 @@ CREATE TABLE classes (
     connections TEXT NOT NULL
 );
 
+CREATE TABLE domains (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    domainname TEXT NOT NULL,
+    description TEXT NOT NULL
+);
+
 CREATE TABLE subclasses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCASE,
     subclassname TEXT NOT NULL,
-    description TEXT,
-    spellcast_ability TEXT,
-    foundation TEXT,
-    specialization TEXT,
-    mastery TEXT
+    description TEXT NOT NULL,
+    spellcast_ability TEXT NOT NULL,
+    foundation TEXT NOT NULL,
+    specialization TEXT NOT NULL,
+    mastery TEXT NOT NULL
     UNIQUE(subclassname)
 );
 
 CREATE TABLE ancestry (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ancestryname TEXT,
-    description TEXT,
+    ancestryname TEXT NOT NULL,
+    description TEXT NOT NULL,
     features TEXT,
     UNIQUE (ancestryname)
 );
 
 CREATE TABLE community (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    communityname TEXT,
-    description TEXT,
-    features TEXT
+    communityname TEXT NOT NULL,
+    description TEXT NOT NULL,
+    features TEXT NOT NULL
 );
 
 CREATE TABLE domaincards (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    abilityname TEXT,
+    abilityname TEXT NOT NULL,
     abilitylevel INT,
-    domain TEXT,
-    type TEXT,
+    domain TEXT NOT NULL,
+    type TEXT NOT NULL,
     recallcost INT,
+    features TEXT NOT NULL
+);
+
+CREATE TABLE adverseries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    adversary TEXT NOT NULL,
+    tier INTEGER,
+    type INTEGER,
+    horde hp INTEGER,
+    description TEXT,
+    motives_and_tactics TEXT,
+    difficulty	INTEGER,
+    thresholdLow INTEGER,
+    thresholdHigh INTEGER,
+    hp	INTEGER,
+    stress	INTEGER,
+    attack	TEXT,
+    weapon TEXT,
+    range TEXT,
+    damage TEXT,
+    experience TEXT,
     features TEXT
 );
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE adverseries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    
+);
