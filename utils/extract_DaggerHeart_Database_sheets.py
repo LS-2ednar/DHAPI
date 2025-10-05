@@ -2,18 +2,21 @@
 This will download all the information available about cards which can be found on this google sheet: https://docs.google.com/spreadsheets/d/1cIoBHAvvuScHrAUnwjGvd-2AxfgsLamWCtx-5x7YYGo/edit?gid=1820067966#gid=1820067966
 Credit for the work goes to: https://www.reddit.com/user/orthling/
 
+Image URL from 
+
 Void content: https://www.daggerheart.com/thevoid/
 
 """
+
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+import re
 
 def extract_domains():
     df = extract_csv_from_google_sheet("2134884751")
     """
-    - Add URL to Image
-    - Add Artist
+    extract Images for the Domains ???
     """
 
 def extract_classes():
@@ -28,31 +31,23 @@ def extract_classes():
 
 def extract_subclasses():
     df = extract_csv_from_google_sheet("1481888499")
-    """
-    - Add URL to Image
-    - Add Artist
-    """
+    df = add_artist_and_image_url(df)
+    return df
 
 def extract_ancestries():
     df = extract_csv_from_google_sheet("1060648534")
-    """
-    - Add URL to Image
-    - Add Artist
-    """
+    df = add_artist_and_image_url(df)
+    return df
 
 def extract_communities():
     df = extract_csv_from_google_sheet("1340074982")
-    """
-    - Add URL to Image
-    - Add Artist
-    """
+    df = add_artist_and_image_url(df)
+    return df
 
 def extract_abilities():
     df = extract_csv_from_google_sheet("1537633946")
-    """
-    - Add URL to Image
-    - Add Artist
-    """
+    df = add_artist_and_image_url(df)
+    return df
 
 def extract_adversaries():
     df = extract_csv_from_google_sheet("542498522")
@@ -127,31 +122,45 @@ def get_void_content():
     df = pd.DataFrame(data=data)
     return df
 
-def add_artist_and_image_url(card_type,card_name):
-    """
-    THIS STILL NEEDS WORK
-    """
-    if " " in card_name:
-        card_name = card_name.replace(" ","-")
+def add_artist_and_image_url(df):
 
-    url = f"https://cardcreator.daggerheart.com/?preview-template={card_type.lower()}-{card_name.lower()}"
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/115.0 Safari/537.36"
-        )
-    }
-    response = requests.get(url, headers=headers, timeout=25)
-    response.raise_for_status()
-    print(response.text)
-    soup = BeautifulSoup(response.text, "html.parser")
-    hrefs = []
-    for a_tag in soup.find_all("a", href=True):
-        href = a_tag["src"].strip()
-        hrefs.append(href)
-    print(hrefs)
+    print(df.columns)
+    URL, Artist = [], []
+    if "Ability" in df.columns:
+        for _, row in df.iterrows():
+            URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/domains/{row['Domain'].lower()}/{row['Ability'].lower().replace(' ','-')}.webp")
+            Artist.append(extract_artist_name(f"https://cardcreator.daggerheart.com/?preview-template=domain-{row['Ability'].lower().replace(' ','-')}"))
 
-add_artist_and_image_url("ancestry","Dwarf")
-add_artist_and_image_url("Community","LoReBORNe")
-add_artist_and_image_url("Domain","RunE Ward")
+    if "Subclass" in df.columns:
+        for _, row in df.iterrows():
+            URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/subclass/{row['Subclass'].lower().replace(' ','-')}.webp")
+            Artist.append(extract_artist_name(f"https://cardcreator.daggerheart.com/?preview-template=subclass-{row['Subclass'].lower().replace(' ','-')}"))
+
+    if "Ancestry" in df.columns:
+        for _, row in df.iterrows():
+            URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/ancestry/{row['Ancestry'].lower().replace(' ','-')}.webp")
+            Artist.append(extract_artist_name(f"https://cardcreator.daggerheart.com/?preview-template=ancestry-{row['Ancestry'].lower().replace(' ','-')}"))
+
+    if "Community" in df.columns:
+        for _, row in df.iterrows():
+            URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/community/{row['Community'].lower().replace(' ','-')}.webp")
+            Artist.append(extract_artist_name(f"https://cardcreator.daggerheart.com/?preview-template=community-{row['Community'].lower().replace(' ','-')}"))
+
+    df["URL"] = URL
+    df["Artist"] = Artist
+    
+    print(df.head(5))
+
+    return df
+
+def extract_artist_name(cardname):
+    # fetch the page
+    response = requests.get("https://cardcreator.daggerheart.com/api/templates")
+        # render the dynamic content (this loads JS and waits for the DOM to finish)
+    
+
+    return None
+
+
+extract_communities()
+
