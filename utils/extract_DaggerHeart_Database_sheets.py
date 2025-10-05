@@ -12,6 +12,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import re
+import json
 
 def extract_domains():
     df = extract_csv_from_google_sheet("2134884751")
@@ -123,44 +124,57 @@ def get_void_content():
     return df
 
 def add_artist_and_image_url(df):
-
-    print(df.columns)
     URL, Artist = [], []
+    response = requests.get("https://cardcreator.daggerheart.com/api/templates")
+    json_string = response.text
+    data = json.loads(json_string)
+    print(data)
+
     if "Ability" in df.columns:
         for _, row in df.iterrows():
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/domains/{row['Domain'].lower()}/{row['Ability'].lower().replace(' ','-')}.webp")
-            Artist.append(extract_artist_name(f"https://cardcreator.daggerheart.com/?preview-template=domain-{row['Ability'].lower().replace(' ','-')}"))
+            for entry in data["domain"]:
+                if entry["name"] == row["Domain"]:
+                    Artist.append(entry["artist"])
 
     if "Subclass" in df.columns:
         for _, row in df.iterrows():
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/subclass/{row['Subclass'].lower().replace(' ','-')}.webp")
-            Artist.append(extract_artist_name(f"https://cardcreator.daggerheart.com/?preview-template=subclass-{row['Subclass'].lower().replace(' ','-')}"))
+            for entry in data["subclass"]:
+                if entry["name"] == row["Subclass"]:
+                    Artist.append(entry["artist"])
 
     if "Ancestry" in df.columns:
         for _, row in df.iterrows():
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/ancestry/{row['Ancestry'].lower().replace(' ','-')}.webp")
-            Artist.append(extract_artist_name(f"https://cardcreator.daggerheart.com/?preview-template=ancestry-{row['Ancestry'].lower().replace(' ','-')}"))
+            for entry in data["ancestry"]:
+                if entry["name"] == row["Ancestry"]:
+                    Artist.append(entry["artist"])
 
     if "Community" in df.columns:
         for _, row in df.iterrows():
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/community/{row['Community'].lower().replace(' ','-')}.webp")
-            Artist.append(extract_artist_name(f"https://cardcreator.daggerheart.com/?preview-template=community-{row['Community'].lower().replace(' ','-')}"))
+            for entry in data["community"]:
+                if entry["name"] == row["Community"]:
+                    Artist.append(entry["artist"])
 
-    df["URL"] = URL
     df["Artist"] = Artist
+    df["URL"] = URL
     
-    print(df.head(5))
+    print("\n\n")
+    print(df.head(20))
 
     return df
 
-def extract_artist_name(cardname):
-    # fetch the page
+def extract_artist_name(card_type,cardname):
+    # fetch the data from https://cardcreator.daggerheart.com/api/templates
     response = requests.get("https://cardcreator.daggerheart.com/api/templates")
-        # render the dynamic content (this loads JS and waits for the DOM to finish)
-    
+    json_string = response.text
+    data = json.loads(json_string)
+    print(data) 
+    for entry in data[card_type]:
+        if entry["name"] == cardname:
+            return entry["artist"]
 
-    return None
-
-
-extract_communities()
+extract_abilities()
 
