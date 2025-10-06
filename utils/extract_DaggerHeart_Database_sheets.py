@@ -128,13 +128,12 @@ def add_artist_and_image_url(df):
     response = requests.get("https://cardcreator.daggerheart.com/api/templates")
     json_string = response.text
     data = json.loads(json_string)
-    print(data)
 
     if "Ability" in df.columns:
         for _, row in df.iterrows():
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/domains/{row['Domain'].lower()}/{row['Ability'].lower().replace(' ','-')}.webp")
             for entry in data["domain"]:
-                if entry["name"] == row["Domain"]:
+                if entry["name"] == row["Ability"]:
                     Artist.append(entry["artist"])
 
     if "Subclass" in df.columns:
@@ -158,6 +157,8 @@ def add_artist_and_image_url(df):
                 if entry["name"] == row["Community"]:
                     Artist.append(entry["artist"])
 
+    print(Artist)
+
     df["Artist"] = Artist
     df["URL"] = URL
     
@@ -166,15 +167,17 @@ def add_artist_and_image_url(df):
 
     return df
 
-def extract_artist_name(card_type,cardname):
+"""def extract_artist_name(card_type,cardname):
     # fetch the data from https://cardcreator.daggerheart.com/api/templates
     response = requests.get("https://cardcreator.daggerheart.com/api/templates")
     json_string = response.text
     data = json.loads(json_string)
-    print(data) 
+    print(cardname)
     for entry in data[card_type]:
-        if entry["name"] == cardname:
+        if entry["id"] == f"{card_type.lower()}-{cardname.lower().replace(' ','-')}":
             return entry["artist"]
+            continue
+        print(cardname)"""
 
-extract_abilities()
+extract_communities()
 
