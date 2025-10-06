@@ -1,11 +1,8 @@
 """
-This will download all the information available about cards which can be found on this google sheet: https://docs.google.com/spreadsheets/d/1cIoBHAvvuScHrAUnwjGvd-2AxfgsLamWCtx-5x7YYGo/edit?gid=1820067966#gid=1820067966
-Credit for the work goes to: https://www.reddit.com/user/orthling/
-
-Image URL from 
-
-Void content: https://www.daggerheart.com/thevoid/
-
+Sources:
+- Google sheet: https://docs.google.com/spreadsheets/d/1cIoBHAvvuScHrAUnwjGvd-2AxfgsLamWCtx-5x7YYGo/edit?gid=1820067966#gid=1820067966 Credit for the work goes to: https://www.reddit.com/user/orthling/ (mainly for )
+- Image URL from https://cardcreator.daggerheart.com 
+- Void content: https://www.daggerheart.com/thevoid/
 """
 
 import pandas as pd
@@ -16,9 +13,7 @@ import json
 
 def extract_domains():
     df = extract_csv_from_google_sheet("2134884751")
-    """
-    extract Images for the Domains ???
-    """
+    df["URL"] = df.apply(lambda row: "https://cardcreator.daggerheart.com/assets/icons/domain-" + row.Domain.lower()+ ".png", axis=1)
 
 def extract_classes():
     df = extract_csv_from_google_sheet("1511012738")
@@ -26,9 +21,9 @@ def extract_classes():
         domain_columns = df["Domains"].str.split(",", expand=True)
         domain_columns.columns = [f"Domain_{i+1}" for i in range(domain_columns.shape[1])]
         df_final = pd.concat([df.drop(columns=["Domains"]),domain_columns],axis=1)
-        print(df_final)
+        return df_final
     except:
-        print(df)
+        return df
 
 def extract_subclasses():
     df = extract_csv_from_google_sheet("1481888499")
@@ -128,56 +123,33 @@ def add_artist_and_image_url(df):
     response = requests.get("https://cardcreator.daggerheart.com/api/templates")
     json_string = response.text
     data = json.loads(json_string)
-
     if "Ability" in df.columns:
         for _, row in df.iterrows():
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/domains/{row['Domain'].lower()}/{row['Ability'].lower().replace(' ','-')}.webp")
+            print(row["Ability"], end=" ")
             for entry in data["domain"]:
-                if entry["name"] == row["Ability"]:
+                if entry["name"].lower().replace("’","'") == row["Ability"].lower().replace("’","'"):
+                    print(entry["name"])
                     Artist.append(entry["artist"])
-
     if "Subclass" in df.columns:
         for _, row in df.iterrows():
+
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/subclass/{row['Subclass'].lower().replace(' ','-')}.webp")
             for entry in data["subclass"]:
                 if entry["name"] == row["Subclass"]:
                     Artist.append(entry["artist"])
-
     if "Ancestry" in df.columns:
         for _, row in df.iterrows():
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/ancestry/{row['Ancestry'].lower().replace(' ','-')}.webp")
             for entry in data["ancestry"]:
                 if entry["name"] == row["Ancestry"]:
                     Artist.append(entry["artist"])
-
     if "Community" in df.columns:
         for _, row in df.iterrows():
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/community/{row['Community'].lower().replace(' ','-')}.webp")
             for entry in data["community"]:
                 if entry["name"] == row["Community"]:
                     Artist.append(entry["artist"])
-
-    print(Artist)
-
     df["Artist"] = Artist
     df["URL"] = URL
-    
-    print("\n\n")
-    print(df.head(20))
-
     return df
-
-"""def extract_artist_name(card_type,cardname):
-    # fetch the data from https://cardcreator.daggerheart.com/api/templates
-    response = requests.get("https://cardcreator.daggerheart.com/api/templates")
-    json_string = response.text
-    data = json.loads(json_string)
-    print(cardname)
-    for entry in data[card_type]:
-        if entry["id"] == f"{card_type.lower()}-{cardname.lower().replace(' ','-')}":
-            return entry["artist"]
-            continue
-        print(cardname)"""
-
-extract_communities()
-
