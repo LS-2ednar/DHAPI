@@ -4,3 +4,5 @@ DHAPI.sql
 *.pdf
 *.json
 *.tar
+.env
+*.log
