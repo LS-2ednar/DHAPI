@@ -3,7 +3,7 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
-from utils.extract_DaggerHeart_Database_sheets import get_void_content
+from utils.extract_DaggerHeart_Database_sheets import get_void_content, extract_domains, extract_abilities
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -36,16 +36,30 @@ async def on_message(message):
     await bot.process_commands(message)
 
 @bot.command()
-async def void(context):
+async def void(cxt):
     df = get_void_content()
     for _, row in df.iterrows():
-        await context.send(f'{row["Content Type"]} Version:{row["Version"]} -> {row["URL"]}', delete_after=30)
+        await cxt.send(f'{row["Content Type"]} Version:{row["Version"]} -> {row["URL"]}', delete_after=30)
+
 
 @bot.command()
-async def clear_chat(context):
+async def domain(cxt, *args): 
+    arguments = ' '.join(args).lower()
+    if len(args) == 0:
+        df = extract_domains()
+        print(df.keys())
+        await cxt.send(f'Available Domains are: {", ".join(df["Domain"])}')
+    if "-arcana" in arguments:
+        df = extract_abilities()
+        df = df[df["Domain" == "Arcana"]]
+
+    print(df)
+    await cxt.send(df)
+@bot.command()
+async def clear_chat(cxt):
     try:
-        await context.send("Okay.... Bye!", delete_after=10)
-        await context.channel.purge(limit=None)
+        await cxt.send("Okay.... Bye!", delete_after=10)
+        await cxt.channel.purge(limit=None)
     except:
         pass
 

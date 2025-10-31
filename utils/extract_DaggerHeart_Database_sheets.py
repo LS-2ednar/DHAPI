@@ -14,6 +14,7 @@ import json
 def extract_domains():
     df = extract_csv_from_google_sheet("2134884751")
     df["URL"] = df.apply(lambda row: "https://cardcreator.daggerheart.com/assets/icons/domain-" + row.Domain.lower()+ ".png", axis=1)
+    return df
 
 def extract_classes():
     df = extract_csv_from_google_sheet("1511012738")
