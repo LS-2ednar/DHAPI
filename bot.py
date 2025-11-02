@@ -3,7 +3,7 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
-from utils.extract_DaggerHeart_Database_sheets import get_void_content, extract_domains, extract_abilities, extract_classes
+from utils.extract_DaggerHeart_Database_sheets import get_void_content, extract_domains, extract_abilities, extract_classes, extract_subclasses, extract_ancestries, extract_communities
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -21,10 +21,44 @@ async def on_ready():
     print(f"{bot.user.name} is ready")
     print(f"{bot.command_prefix}")
     
-    global df_domaincards 
-    df_domaincards = extract_abilities()
-    global df_classes
-    df_classes = extract_classes()
+    try:
+        global df_domaincards 
+        df_domaincards = extract_abilities()
+        print("loaded: Domaincards")
+    except:
+        print("Could not load Domaincards")
+        pass
+
+    try:
+        global df_classes
+        df_classes = extract_classes()
+        print("loaded: Classes")
+    except:
+        print("Could not load Classcards")
+        pass
+
+    try:
+        global df_subclasses
+        df_subclasses = extract_subclasses()
+        print("loaded: Subclasses")
+    except:
+        print("Could not load Subclassescards")
+        pass
+
+    try:
+        global df_ancestries
+        df_ancestries = extract_ancestries()
+        print("loaded: Ancestries")
+    except:
+        print("Could not load Ancestriescards")
+        pass
+
+    try:
+        global df_communities
+        df_communities = extract_communities()
+        print("loaded: Communities")
+    except:
+        print("Could not load Communitycards")
 
     print(f"{bot.name} is ready!")
 
@@ -46,13 +80,13 @@ async def on_message(message):
 """
 Commands
 """
-@bot.command()
+@bot.command(help='Display official Playtest Material from the "Void".', description="Display additional Void Material via hyperlink.")
 async def void(cxt):
     df = get_void_content()
     for _, row in df.iterrows():
         await cxt.send(f'{row["Content Type"]} Version:{row["Version"]} -> {row["URL"]}', delete_after=60)
 
-@bot.command()
+@bot.command(help="Displays Domain infromation", description=f"Please try: {bot.command_prefix}domain class | {bot.command_prefix}domain DOMAINNAME | {bot.command_prefix}domain card CARDNAME")
 async def domain(cxt, *args): 
     arguments = ' '.join(args).lower()
     if len(args) == 0:
@@ -67,6 +101,7 @@ async def domain(cxt, *args):
             text = ""
             for _, row in df.iterrows():
                 text += f'{row["Ability"]} - {row["Level"]}\n'
+            await cxt.send(text)
         except:
             pass
 
@@ -79,14 +114,41 @@ async def domain(cxt, *args):
         text = f'**{df_card["Ability"][idx]}** - **{df_card["Domain"][idx]}** - **{df_card["Level"][idx]}**\n\n{df_card["Features"][idx]}'
         await cxt.send(text)
 
-    elif "class" in args:
+    if "class" in args:
         table = ""
         for _, row in df_classes.iterrows():
             Class, D1, D2 = row["Class"], row["Domain_1"], row["Domain_2"] 
             table+= f'**{Class}** \n- {D1} & {D2}\n'
         await cxt.send(table)
 
-        
+@bot.command(help="", description="")
+async def card(cxt, *args):
+
+    """
+    1. TRY TO FIND THE MATCHING DATABASE OF THE CARDNAME PROVIDED
+    2. CREATE A MESSAGE TO SEND THE MESSAGE TO THE SERVER
+    3. PROVIDE IMAGE AND MESSAGE TO DISCORD
+    """
+    try:
+        print(f"Domain {df_domaincards.keys()}")
+    except:
+        pass
+    try:
+        print(f"Classes {df_classes.keys()}")
+    except:
+        pass
+    try:
+        print(f"Subclasses {df_subclasses.keys()}")
+    except:
+        pass
+    try:
+        print(f"Ancestries {df_ancestries.keys()}")
+    except:
+        pass
+    try:
+        print(f"Communities {df_communities.keys()}")
+    except:
+        pass
 """
 Cleaning the Chat
 """  
