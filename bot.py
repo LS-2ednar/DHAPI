@@ -18,8 +18,11 @@ Events
 """
 @bot.event
 async def on_ready():
-    print(f"{bot.user.name} is ready")
-    print(f"{bot.command_prefix}")
+    print(f"\n{bot.user.name} is ready\n")
+    print(f"USE {bot.command_prefix}help FOR COMMAND OVERVIEW")
+    print("\n--------------------")
+    print("Loading Datasources:")
+    print("--------------------\n")
     
     try:
         global df_domaincards 
@@ -59,8 +62,7 @@ async def on_ready():
         print("loaded: Communities")
     except:
         print("Could not load Communitycards")
-
-    print(f"{bot.name} is ready!")
+    
 
 @bot.event
 async def on_member_join(member):
@@ -123,12 +125,12 @@ async def domain(cxt, *args):
 
 @bot.command(help="", description="")
 async def card(cxt, *args):
-
     """
     1. TRY TO FIND THE MATCHING DATABASE OF THE CARDNAME PROVIDED
     2. CREATE A MESSAGE TO SEND THE MESSAGE TO THE SERVER
     3. PROVIDE IMAGE AND MESSAGE TO DISCORD
     """
+    print("FUNCTION: CARDS")
     try:
         print(f"Domain {df_domaincards.keys()}")
     except:

@@ -28,8 +28,11 @@ def extract_classes():
 
 def extract_subclasses():
     df = extract_csv_from_google_sheet("1481888499")
-    df = add_artist_and_image_url(df)
-    return df
+    try:
+        df = add_artist_and_image_url(df)
+        return df
+    except:
+        return df
 
 def extract_ancestries():
     df = extract_csv_from_google_sheet("1060648534")
@@ -93,7 +96,6 @@ def extract_wheelchairs():
 def extract_csv_from_google_sheet(gid):
     sheet_id = "1cIoBHAvvuScHrAUnwjGvd-2AxfgsLamWCtx-5x7YYGo"
     df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}")   
-    print(df)
     return df
 
 def get_void_content():
@@ -127,10 +129,8 @@ def add_artist_and_image_url(df):
     if "Ability" in df.columns:
         for _, row in df.iterrows():
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/domains/{row['Domain'].lower()}/{row['Ability'].lower().replace(' ','-')}.webp")
-            print(row["Ability"], end=" ")
             for entry in data["domain"]:
                 if entry["name"].lower().replace("’","'") == row["Ability"].lower().replace("’","'"):
-                    print(entry["name"])
                     Artist.append(entry["artist"])
     if "Subclass" in df.columns:
         for _, row in df.iterrows():
