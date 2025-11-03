@@ -134,7 +134,6 @@ def add_artist_and_image_url(df):
                     Artist.append(entry["artist"])
     if "Subclass" in df.columns:
         for _, row in df.iterrows():
-
             URL.append(f"https://pub-cdae2c597d234591b04eed47a98f233c.r2.dev/v1/card-header-images/subclass/{row['Subclass'].lower().replace(' ','-')}.webp")
             for entry in data["subclass"]:
                 if entry["name"] == row["Subclass"]:
@@ -151,6 +150,9 @@ def add_artist_and_image_url(df):
             for entry in data["community"]:
                 if entry["name"] == row["Community"]:
                     Artist.append(entry["artist"])
-    df["Artist"] = Artist
+    try:
+        df["Artist"] = Artist
+    except:
+        pass
     df["URL"] = URL
     return df
