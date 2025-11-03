@@ -125,13 +125,17 @@ async def domain(cxt, *args):
 
 @bot.command(help="123", description="123")
 async def card(cxt, *args):
-    """
-    1. TRY TO FIND THE MATCHING DATABASE OF THE CARDNAME PROVIDED
-    2. CREATE A MESSAGE TO SEND THE MESSAGE TO THE SERVER
-    3. PROVIDE IMAGE AND MESSAGE TO DISCORD
-    """
+
     cardname = ' '.join(args).title()
-    text  = ""
+
+    """
+    ADD Functionality to display
+    -> all card names for Subclasses, ancetries and communities
+    -> all cards per domain
+    if !card domain
+    return to please select a !card domain DOMAINNAME and then display cards accordingly (see command !domain) 
+    """
+
     if cardname in df_domaincards["Ability"].tolist():
         mask = df_domaincards["Ability"] == cardname
         df_card = df_domaincards.loc[mask]
@@ -152,27 +156,34 @@ async def card(cxt, *args):
         await cxt.send(text)
         """
     elif cardname in df_subclasses["Subclass"].tolist():
-        print(df_subclasses.keys())
         mask = df_subclasses["Subclass"] == cardname
         df_card = df_subclasses.loc[mask]
         idx = df_card.index[0]
         img = f'[{df_card["Subclass"][idx]}]({df_card["URL"][idx]})'
-        text = f'**{df_card["Subclass"][idx]}**\n**Foundation**\n{df_card["Foundation Features"][idx]} - **{df_card["Specialization Features"][idx]}**\n\n{df_card["Mastery Features"][idx]}'
+        text = f'**{df_card["Class"][idx]} - Subclass: {df_card["Subclass"][idx]}**\n\n**Foundation:**\n{df_card["Foundation Features"][idx]}\n\n**Specialization:**\n{df_card["Specialization Features"][idx]}\n\n**Mastery:**\n{df_card["Mastery Features"][idx]}'
         await cxt.send(img)
         await cxt.send(text)
 
     elif cardname in df_ancestries["Ancestry"].tolist():
-        text = "Ancestry"
+        mask = df_ancestries["Ancestry"] == cardname
+        df_card = df_ancestries.loc[mask]
+        idx = df_card.index[0]
+        img = f'[{df_card["Ancestry"][idx]}]({df_card["URL"][idx]})'
+        text = f'**Ancestry: {df_card["Ancestry"][idx]}**\n\n**Features:**\n{df_card["Features"][idx]}\n\n**Description:**\n{df_card["Description"][idx]}'
+        await cxt.send(img)
         await cxt.send(text)
 
     elif cardname in df_communities["Community"].tolist():
-        text = "Community"
+        mask = df_communities["Community"] == cardname
+        df_card = df_communities.loc[mask]
+        idx = df_card.index[0]
+        img = f'[{df_card["Community"][idx]}]({df_card["URL"][idx]})'
+        text = f'**Community: {df_card["Community"][idx]}**\n\n**Features:**\n{df_card["Features"][idx]}\n\n**Description:**\n{df_card["Description"][idx]}'
+        await cxt.send(img)
         await cxt.send(text)
         
     else:
         print("something went wrong")
-
-    
 
 """
 Cleaning the Chat
