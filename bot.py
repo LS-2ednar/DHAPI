@@ -18,9 +18,12 @@ Events
 """
 @bot.event
 async def on_ready():
-    print(f"\n{bot.user.name} is ready\n")
-    print(f"USE {bot.command_prefix}help FOR COMMAND OVERVIEW")
-    print("\n--------------------")
+    print("\n-----------------------------")
+    print(f"STARTING DISCORD BOT: {bot.user.name}")
+    print("-----------------------------\n")
+
+
+    print("--------------------")
     print("Loading Datasources:")
     print("--------------------\n")
     
@@ -62,7 +65,9 @@ async def on_ready():
         print("loaded: Communities")
     except:
         print("Could not load Communitycards")
-    
+
+    print(f"\n{bot.user.name} is ready\n")
+    print(f"USE {bot.command_prefix}help FOR COMMAND OVERVIEW")
 
 @bot.event
 async def on_member_join(member):
@@ -72,10 +77,13 @@ async def on_member_join(member):
 async def on_message(message):
     if message.author == bot.user:
         return
-
-    if "Zitronensorbet" in message.content:
-        await message.delete()
-        await message.channel.send(f"Psst... {message.author.mention} this opens the Door to Dumbledoors Office!") 
+    
+    if message.content == "cc" or message.content == "cls" or message.content == "clear chat" or message.content == "clear_chat":
+        try:
+            await message.channel.send("Okay.... Bye!", delete_after=10)
+            await message.channel.purge(limit=None)
+        except:
+            pass
 
     await bot.process_commands(message)
 
@@ -128,13 +136,28 @@ async def card(cxt, *args):
 
     cardname = ' '.join(args).title()
 
-    """
-    ADD Functionality to display
-    -> all card names for Subclasses, ancetries and communities
-    -> all cards per domain
-    if !card domain
-    return to please select a !card domain DOMAINNAME and then display cards accordingly (see command !domain) 
-    """
+    if len(cardname) == 0:
+        await cxt.send(f"Use one of the following keywords to learn about available cards per cardtype:\n\n{bot.command_prefix}card domain or {bot.command_prefix}card domains\n{bot.command_prefix}card subclass or {bot.command_prefix}card subclasses\n{bot.command_prefix}card ancestry or {bot.command_prefix}card ancestries\n{bot.command_prefix}card community or {bot.command_prefix}card communities")
+
+    if cardname == "Domain" or cardname == "Domains":
+        text = f"There are way to many domaincards!!\n\nuse **{bot.command_prefix}domain**\n\nand learn about the different domains and there cards. Here are some domaincard examples:\n" 
+        text += "\n- ".join(df_domaincards["Ability"].tolist())
+        await cxt.send(text[0:499]+"\n... and more")
+        
+    if cardname == "Subclass" or cardname == "Subclasses":
+        text = "Here are all Subclasscards:\n"
+        text += "\n- ".join(df_subclasses["Subclass"].tolist())
+        await cxt.send(text)
+
+    if cardname == "Ancestry" or cardname == "Ancestries":
+        text = "Here are all Ancestycards:\n"
+        text += "\n- ".join(df_ancestries["Ancestry"].tolist())
+        await cxt.send(text)
+
+    if cardname == "Community" or cardname == "Communities":
+        text = "Here are all Communiycards:\n"
+        text += "\n- ".join(df_communities["Community"].tolist())
+        await cxt.send(text)
 
     if cardname in df_domaincards["Ability"].tolist():
         mask = df_domaincards["Ability"] == cardname
@@ -144,17 +167,7 @@ async def card(cxt, *args):
         text = f'**{df_card["Ability"][idx]}** - **{df_card["Domain"][idx]}** - **{df_card["Level"][idx]}**\n\n{df_card["Features"][idx]}'
         await cxt.send(img)
         await cxt.send(text)
-        """
-    elif cardname in df_classes["Class"].tolist():
-        print(df_subclasses.keys())
-        mask = df_classes["Class"] == cardname
-        df_card = df_classes.loc[mask]
-        idx = df_card.index[0]
-        img = f'[{df_card["Class"][idx]}]({df_card["URL"][idx]})'
-        text = f'**{df_card["Class"][idx]}** - **{df_card["Domain"][idx]}** - **{df_card["Level"][idx]}**\n\n{df_card["Features"][idx]}'
-        await cxt.send(img)
-        await cxt.send(text)
-        """
+
     elif cardname in df_subclasses["Subclass"].tolist():
         mask = df_subclasses["Subclass"] == cardname
         df_card = df_subclasses.loc[mask]
@@ -181,28 +194,6 @@ async def card(cxt, *args):
         text = f'**Community: {df_card["Community"][idx]}**\n\n**Features:**\n{df_card["Features"][idx]}\n\n**Description:**\n{df_card["Description"][idx]}'
         await cxt.send(img)
         await cxt.send(text)
-        
-    else:
-        print("something went wrong")
-
-"""
-Cleaning the Chat
-"""  
-@bot.command()
-async def clear_chat(cxt):
-    try:
-        await cxt.send("Okay.... Bye!", delete_after=10)
-        await cxt.channel.purge(limit=None)
-    except:
-        pass
-
-@bot.command()
-async def cc(cxt):
-    try:
-        await cxt.send("Okay.... Bye!", delete_after=10)
-        await cxt.channel.purge(limit=None)
-    except:
-        pass
 
 """
 Rune the Bot
