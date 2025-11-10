@@ -1,12 +1,12 @@
 from fillpdf import fillpdfs
 
-def new_char(char_class=None):
+def new_char(char_class=None, character_data):
 
     #1 check files for identical naming
     #2 if identical get from source everytime -> otherwise do it yourself using sedja
     #3 Use character creation process to generate the first bases of the character
 
-    form_fields = fillpdfs.get_form_fields("Bard.pdf").keys()
+    form_fields = fillpdfs.get_form_fields("templates/character_sheet.pdf").keys()
     print(form_fields)
     for field in form_fields:
         if "_" in field:
@@ -15,7 +15,7 @@ def new_char(char_class=None):
 
     pass
 
-
+    fillpdfs.write_fillable_pdf("character_sheet.pdf","test_char.pdf", character_data)
 
 
 #Example

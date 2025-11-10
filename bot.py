@@ -195,7 +195,48 @@ async def card(cxt, *args):
         await cxt.send(img)
         await cxt.send(text)
 
+@bot.command(help="new char function", description="creates a pdf for a new char")
+async def newchar(cxt, *args):
+
+    data = {
+        'charname':'',
+        'pronouns':'',
+        'heritage':'',
+        'class':'',
+        'subclass':'',
+        'agility':'',
+        'strength':'',
+        'finesse':'',
+        'instinct':'',
+        'presence':'',
+        'knowledge':'',
+        'evasion':'',
+        'hp':''
+    }
+
+    arguments_raw = " ".join(args)
+    argument_pairs = arguments_raw.lower().split(",")
+
+    print(arguments_raw)
+    print(argument_pairs)
+
+    for argument in argument_pairs:
+
+        if "name" in argument:
+            print("NAME")
+            print(argument.split("=")[1].strip().title())
+        if "heritage" in argument:
+            print("HERITAGE")
+            print(argument.split("=")[1].strip().title())
+        if "class" in argument and "subclass" not in argument:
+            print("CLASS")
+            print(argument.split("=")[1].strip().title())
+        if "subclass" in argument:
+            print("SUBCLASS")
+            print(argument.split("=")[1].strip().title())
+
+    
 """
-Rune the Bot
+Run the Bot
 """
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
