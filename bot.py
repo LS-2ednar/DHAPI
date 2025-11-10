@@ -4,6 +4,7 @@ import logging
 from dotenv import load_dotenv
 import os
 from utils.extract_DaggerHeart_Database_sheets import get_void_content, extract_domains, extract_abilities, extract_classes, extract_subclasses, extract_ancestries, extract_communities
+from utils.character_creator import new_char
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -200,18 +201,24 @@ async def newchar(cxt, *args):
 
     data = {
         'charname':'',
-        'pronouns':'',
         'heritage':'',
         'class':'',
         'subclass':'',
-        'agility':'',
-        'strength':'',
-        'finesse':'',
-        'instinct':'',
-        'presence':'',
-        'knowledge':'',
+        'agility':'100', #remove?
+        'strength':'100', #remove? 
+        'finesse':'100', #remove?
+        'instinct':'100', #remove?
+        'presence':'100', #remove?
+        'knowledge':'100', #remove?
         'evasion':'',
-        'hp':''
+        'maxHP':'',
+        'maxStress':'6',
+        'hopefeature':'',
+        'classfeatures':'',
+        'questions':'',
+        'connections':'',
+        'domain1':'',
+        'domain2':''
     }
 
     arguments_raw = " ".join(args)
@@ -219,21 +226,52 @@ async def newchar(cxt, *args):
 
     print(arguments_raw)
     print(argument_pairs)
+    heritage_l = ['','']
 
     for argument in argument_pairs:
 
         if "name" in argument:
             print("NAME")
             print(argument.split("=")[1].strip().title())
-        if "heritage" in argument:
-            print("HERITAGE")
+            data["charname"] = argument.split("=")[1].strip().title()
+
+        if "ancestry" in argument:
+            print("ancestry")
             print(argument.split("=")[1].strip().title())
+            heritage_l[0] = argument.split("=")[1].strip().title()
+
+        if "community" in argument:
+            print("community")
+            print(argument.split("=")[1].strip().title())
+            heritage_l[1] = argument.split("=")[1].strip().title()
+
         if "class" in argument and "subclass" not in argument:
             print("CLASS")
             print(argument.split("=")[1].strip().title())
+
+            mask = df_classes["Class"] == argument.split("=")[1].strip().title()
+            df_card = df_classes.loc[mask]
+            idx = df_card.index[0]
+
+            data["class"] = argument.split("=")[1].strip().title()
+            data["evasion"] = str(df_card["Starting Evasion"][idx])
+            data["maxHP"] = str(df_card["Starting HP"][idx])
+            data["hopefeature"] = df_card["Hope Feature"][idx] 
+            data["classfeatures"] = df_card["Class Features"][idx]
+            data["questions"] = df_card["Questions"][idx]
+            data["connections"] = df_card["Connections"][idx]
+            data["domain1"] = df_card["Domain_1"][idx]
+            data["domain2"] = df_card["Domain_2"][idx]
+            
         if "subclass" in argument:
             print("SUBCLASS")
             print(argument.split("=")[1].strip().title())
+            data["subclass"] = argument.split("=")[1].strip().title()
+
+    data["heritage"] = f'{heritage_l[0]} | {heritage_l[1]}'
+    print(data)
+    new_char(data)
+
 
     
 """

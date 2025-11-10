@@ -155,3 +155,5 @@ def add_artist_and_image_url(df):
         pass
     df["URL"] = URL
     return df
+
+print(extract_classes().keys())
