@@ -9,6 +9,7 @@ import pandas as pd
 import requests
 import re
 import json
+from bs4 import BeautifulSoup
 
 def extract_domains():
     df = extract_csv_from_google_sheet("2134884751")
@@ -155,5 +156,3 @@ def add_artist_and_image_url(df):
         pass
     df["URL"] = URL
     return df
-
-print(extract_classes().keys())

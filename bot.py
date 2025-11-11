@@ -3,6 +3,8 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
+import requests
+import tempfile
 from utils.extract_DaggerHeart_Database_sheets import get_void_content, extract_domains, extract_abilities, extract_classes, extract_subclasses, extract_ancestries, extract_communities
 from utils.character_creator import new_char
 
@@ -75,35 +77,62 @@ async def on_member_join(member):
     await member.send(f"Hi, {member.name}!")
 
 @bot.event
-async def on_message(message):
+async def on_message(message: discord.Message):
+    TRIGGERS = {"cc", "cls", "clear chat", "clear_chat"}
     if message.author == bot.user:
         return
-    
-    if message.content == "cc" or message.content == "cls" or message.content == "clear chat" or message.content == "clear_chat":
+
+    content = message.content.lower().strip()
+
+    if isinstance(message.channel, (discord.TextChannel, discord.Thread)) and content in TRIGGERS:
         try:
-            await message.channel.send("Okay.... Bye!", delete_after=10)
+            msg = await message.channel.send("Okay… Bye! This will be wiped in a moment.", delete_after=3)
+            # Requires Manage Messages permission. Purge removes all users' messages; consider a smaller limit.
             await message.channel.purge(limit=None)
-        except:
+        except discord.Forbidden:
+            await message.channel.send("⚠️ I need Manage Messages permission to purge here.", delete_after=5)
+        except Exception:
             pass
+        return
 
     await bot.process_commands(message)
 
 """
 Commands
 """
-@bot.command(help='Display official Playtest Material from the "Void".', description="Display additional Void Material via hyperlink.")
-async def void(cxt):
+@bot.command(help='Display official Playtest Material from the "Void" in the chat.',
+             description="Display additional Void Material via downloadable PDF.")
+async def void(ctx):
     df = get_void_content()
+
     for _, row in df.iterrows():
-        await cxt.send(f'{row["Content Type"]} Version:{row["Version"]} -> {row["URL"]}', delete_after=60)
+        url = row["URL"]
+        filename = url.split("/")[-1]
+
+        try:
+            response = requests.get(url, timeout=15)
+            response.raise_for_status()
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+                tmp_file.write(response.content)
+                tmp_file_path = tmp_file.name
+
+            file = discord.File(tmp_file_path, filename=filename)
+            await ctx.send(
+                content=f'{row["Content Type"]} Version:{row["Version"]}',
+                file=file
+            )
+
+        except Exception as e:
+            await ctx.send(f"❌ Error downloading {url}: {e}", delete_after=30)
 
 @bot.command(help="Displays Domain infromation", description=f"Please try: {bot.command_prefix}domain class | {bot.command_prefix}domain DOMAINNAME | {bot.command_prefix}domain card CARDNAME")
-async def domain(cxt, *args): 
+async def domain(ctx, *args): 
     arguments = ' '.join(args).lower()
     if len(args) == 0:
         df = extract_domains()
         text = "\n".join(df["Domain"])
-        await cxt.send(f'Available Domains are:\n{text}')
+        await ctx.send(f'Available Domains are:\n{text}')
 
     if len(args) == 1:
         try:
@@ -112,7 +141,7 @@ async def domain(cxt, *args):
             text = ""
             for _, row in df.iterrows():
                 text += f'{row["Ability"]} - {row["Level"]}\n'
-            await cxt.send(text)
+            await ctx.send(text)
         except:
             pass
 
@@ -121,44 +150,44 @@ async def domain(cxt, *args):
         mask = df_domaincards["Ability"] == card
         df_card = df_domaincards.loc[mask]
         idx = df_card.index[0]
-        await cxt.send(f'![{df_card["Ability"][idx]}]({df_card["URL"][idx]})',)
+        await ctx.send(f'![{df_card["Ability"][idx]}]({df_card["URL"][idx]})',)
         text = f'**{df_card["Ability"][idx]}** - **{df_card["Domain"][idx]}** - **{df_card["Level"][idx]}**\n\n{df_card["Features"][idx]}'
-        await cxt.send(text)
+        await ctx.send(text)
 
     if "class" in args:
         table = ""
         for _, row in df_classes.iterrows():
             Class, D1, D2 = row["Class"], row["Domain_1"], row["Domain_2"] 
             table+= f'**{Class}** \n- {D1} & {D2}\n'
-        await cxt.send(table)
+        await ctx.send(table)
 
-@bot.command(help="123", description="123")
-async def card(cxt, *args):
+@bot.command(help="Displays a specific card in the chat", description="Given a proper <CARDNAME> the card details get displayed in the chat")
+async def card(ctx, *args):
 
     cardname = ' '.join(args).title()
 
     if len(cardname) == 0:
-        await cxt.send(f"Use one of the following keywords to learn about available cards per cardtype:\n\n{bot.command_prefix}card domain or {bot.command_prefix}card domains\n{bot.command_prefix}card subclass or {bot.command_prefix}card subclasses\n{bot.command_prefix}card ancestry or {bot.command_prefix}card ancestries\n{bot.command_prefix}card community or {bot.command_prefix}card communities")
+        await ctx.send(f"Use one of the following keywords to learn about available cards per cardtype:\n\n{bot.command_prefix}card domain or {bot.command_prefix}card domains\n{bot.command_prefix}card subclass or {bot.command_prefix}card subclasses\n{bot.command_prefix}card ancestry or {bot.command_prefix}card ancestries\n{bot.command_prefix}card community or {bot.command_prefix}card communities")
 
     if cardname == "Domain" or cardname == "Domains":
         text = f"There are way to many domaincards!!\n\nuse **{bot.command_prefix}domain**\n\nand learn about the different domains and there cards. Here are some domaincard examples:\n" 
         text += "\n- ".join(df_domaincards["Ability"].tolist())
-        await cxt.send(text[0:499]+"\n... and more")
+        await ctx.send(text[0:499]+"\n... and more")
         
     if cardname == "Subclass" or cardname == "Subclasses":
         text = "Here are all Subclasscards:\n"
         text += "\n- ".join(df_subclasses["Subclass"].tolist())
-        await cxt.send(text)
+        await ctx.send(text)
 
     if cardname == "Ancestry" or cardname == "Ancestries":
         text = "Here are all Ancestycards:\n"
         text += "\n- ".join(df_ancestries["Ancestry"].tolist())
-        await cxt.send(text)
+        await ctx.send(text)
 
     if cardname == "Community" or cardname == "Communities":
         text = "Here are all Communiycards:\n"
         text += "\n- ".join(df_communities["Community"].tolist())
-        await cxt.send(text)
+        await ctx.send(text)
 
     if cardname in df_domaincards["Ability"].tolist():
         mask = df_domaincards["Ability"] == cardname
@@ -166,8 +195,8 @@ async def card(cxt, *args):
         idx = df_card.index[0]
         img = f'[{df_card["Ability"][idx]}]({df_card["URL"][idx]})'
         text = f'**{df_card["Ability"][idx]}** - **{df_card["Domain"][idx]}** - **{df_card["Level"][idx]}**\n\n{df_card["Features"][idx]}'
-        await cxt.send(img)
-        await cxt.send(text)
+        await ctx.send(img)
+        await ctx.send(text)
 
     elif cardname in df_subclasses["Subclass"].tolist():
         mask = df_subclasses["Subclass"] == cardname
@@ -175,8 +204,8 @@ async def card(cxt, *args):
         idx = df_card.index[0]
         img = f'[{df_card["Subclass"][idx]}]({df_card["URL"][idx]})'
         text = f'**{df_card["Class"][idx]} - Subclass: {df_card["Subclass"][idx]}**\n\n**Foundation:**\n{df_card["Foundation Features"][idx]}\n\n**Specialization:**\n{df_card["Specialization Features"][idx]}\n\n**Mastery:**\n{df_card["Mastery Features"][idx]}'
-        await cxt.send(img)
-        await cxt.send(text)
+        await ctx.send(img)
+        await ctx.send(text)
 
     elif cardname in df_ancestries["Ancestry"].tolist():
         mask = df_ancestries["Ancestry"] == cardname
@@ -184,8 +213,8 @@ async def card(cxt, *args):
         idx = df_card.index[0]
         img = f'[{df_card["Ancestry"][idx]}]({df_card["URL"][idx]})'
         text = f'**Ancestry: {df_card["Ancestry"][idx]}**\n\n**Features:**\n{df_card["Features"][idx]}\n\n**Description:**\n{df_card["Description"][idx]}'
-        await cxt.send(img)
-        await cxt.send(text)
+        await ctx.send(img)
+        await ctx.send(text)
 
     elif cardname in df_communities["Community"].tolist():
         mask = df_communities["Community"] == cardname
@@ -193,23 +222,23 @@ async def card(cxt, *args):
         idx = df_card.index[0]
         img = f'[{df_card["Community"][idx]}]({df_card["URL"][idx]})'
         text = f'**Community: {df_card["Community"][idx]}**\n\n**Features:**\n{df_card["Features"][idx]}\n\n**Description:**\n{df_card["Description"][idx]}'
-        await cxt.send(img)
-        await cxt.send(text)
+        await ctx.send(img)
+        await ctx.send(text)
 
-@bot.command(help="new char function", description="creates a pdf for a new char")
-async def newchar(cxt, *args):
+@bot.command(help="Creates a new character pdf file", description="available parameters are: <NAME>, <CLASS>, <COMMUNITY>, <ANCESTRY>, <CLASS>, <SUBCLASS> seperate the parameters by comma")
+async def newchar(ctx, *args):
 
     data = {
         'charname':'',
         'heritage':'',
         'class':'',
         'subclass':'',
-        'agility':'100', #remove?
-        'strength':'100', #remove? 
-        'finesse':'100', #remove?
-        'instinct':'100', #remove?
-        'presence':'100', #remove?
-        'knowledge':'100', #remove?
+        'agility':'', 
+        'strength':'',  
+        'finesse':'', 
+        'instinct':'', 
+        'presence':'', 
+        'knowledge':'', 
         'evasion':'',
         'maxHP':'',
         'maxStress':'6',
@@ -218,37 +247,26 @@ async def newchar(cxt, *args):
         'questions':'',
         'connections':'',
         'domain1':'',
-        'domain2':''
+        'domain2':'',
+        'level':'1'
     }
 
     arguments_raw = " ".join(args)
     argument_pairs = arguments_raw.lower().split(",")
-
-    print(arguments_raw)
-    print(argument_pairs)
     heritage_l = ['','']
 
     for argument in argument_pairs:
 
         if "name" in argument:
-            print("NAME")
-            print(argument.split("=")[1].strip().title())
             data["charname"] = argument.split("=")[1].strip().title()
 
         if "ancestry" in argument:
-            print("ancestry")
-            print(argument.split("=")[1].strip().title())
             heritage_l[0] = argument.split("=")[1].strip().title()
 
         if "community" in argument:
-            print("community")
-            print(argument.split("=")[1].strip().title())
             heritage_l[1] = argument.split("=")[1].strip().title()
 
         if "class" in argument and "subclass" not in argument:
-            print("CLASS")
-            print(argument.split("=")[1].strip().title())
-
             mask = df_classes["Class"] == argument.split("=")[1].strip().title()
             df_card = df_classes.loc[mask]
             idx = df_card.index[0]
@@ -262,17 +280,95 @@ async def newchar(cxt, *args):
             data["connections"] = df_card["Connections"][idx]
             data["domain1"] = df_card["Domain_1"][idx]
             data["domain2"] = df_card["Domain_2"][idx]
+
+            """
+            Check the recommended values for agility, strength, finesse, instinct, presence, knowledge 
+            This section might be updated in the future to ensure it works more efficient.
+            """
+            if argument.split("=")[1].strip().title() == "Bard":
+                data["agility"] = "0"
+                data["strength"] = "-1"
+                data["finesse"] = "+1"
+                data["instinct"] = "0"
+                data["presence"] = "+2"
+                data["knowledge"] = "+1"
+
+            if argument.split("=")[1].strip().title() == "Druid":
+                data["agility"] = "+1"
+                data["strength"] = "0"
+                data["finesse"] = "+1"
+                data["instinct"] = "+2"
+                data["presence"] = "-1"
+                data["knowledge"] = "0"
+
+            if argument.split("=")[1].strip().title() == "Guardian":
+                data["agility"] = "+1"
+                data["strength"] = "+2"
+                data["finesse"] = "-1"
+                data["instinct"] = "0"
+                data["presence"] = "+1"
+                data["knowledge"] = "0"
+
+            if argument.split("=")[1].strip().title() == "Ranger":
+                data["agility"] = "+2"
+                data["strength"] = "0"
+                data["finesse"] = "+1"
+                data["instinct"] = "+1"
+                data["presence"] = "-1"
+                data["knowledge"] = "0"
+
+            if argument.split("=")[1].strip().title() == "Rogue":
+                data["agility"] = "+1"
+                data["strength"] = "-1"
+                data["finesse"] = "+2"
+                data["instinct"] = "0"
+                data["presence"] = "+1"
+                data["knowledge"] = "0"
+
+            if argument.split("=")[1].strip().title() == "Seraph":
+                data["agility"] = "0"
+                data["strength"] = "+2"
+                data["finesse"] = "0"
+                data["instinct"] = "+1"
+                data["presence"] = "+1"
+                data["knowledge"] = "-1"
+
+            if argument.split("=")[1].strip().title() == "Sorcerer":
+                data["agility"] = "0"
+                data["strength"] = "-1"
+                data["finesse"] = "+1"
+                data["instinct"] = "+2"
+                data["presence"] = "+1"
+                data["knowledge"] = "0"
+
+            if argument.split("=")[1].strip().title() == "Warrior":
+                data["agility"] = "+2"
+                data["strength"] = "+1"
+                data["finesse"] = "0"
+                data["instinct"] = "+1"
+                data["presence"] = "-1"
+                data["knowledge"] = "0"
+
+            if argument.split("=")[1].strip().title() == "Wizard":
+                data["agility"] = "-1"
+                data["strength"] = "0"
+                data["finesse"] = "0"
+                data["instinct"] = "+1"
+                data["presence"] = "+1"
+                data["knowledge"] = "+2"
             
         if "subclass" in argument:
-            print("SUBCLASS")
-            print(argument.split("=")[1].strip().title())
             data["subclass"] = argument.split("=")[1].strip().title()
 
     data["heritage"] = f'{heritage_l[0]} | {heritage_l[1]}'
-    print(data)
-    new_char(data)
-
-
+    char_file = new_char(data)
+    user = ctx.author 
+    try:
+        await ctx.send(
+            content=f"Hey {user.name} here is your new charactersheet.\n\nNOTE\n\nThis is still a work in progress. Check your Evasion and stress values",
+            file=discord.File(char_file))
+    except:
+        pass
     
 """
 Run the Bot
