@@ -17,10 +17,10 @@ When the Bot Starts it fetches current available information form different sour
 
 When everything is downloaded the bot has the following functions:
 
-- !card <CARDNAME>  --> Dispalys an available card     
-- !domain <None> | <DOMAINNAME> | <DOMAINCARDNAME> --> Provides information on the avialbale Domains, the available Cards per Domain or displays a domaincard in the chat 
-- !newchar <NAME> | <CLASS> | <SUBCLASS> | <COMMUNITY> | <ANCESTRY> --> Creates a new charactersheet with all information filled in based on given inputs
-- !void <None> --> Provides Downloadable PDFs to the content available on "The Void"
+- !card CARDNAME  &rarr; Dispalys an available card     
+- !domain None | DOMAINNAME | DOMAINCARDNAME &rarr; Provides information on the avialbale Domains, the available Cards per Domain or displays a domaincard in the chat 
+- !newchar NAME | CLASS | SUBCLASS | COMMUNITY | ANCESTRY &rarr; Creates a new charactersheet with all information filled in based on given inputs
+- !void None &rarr; Provides Downloadable PDFs to the content available on "The Void"
 
 # How this project was created
 I realized that there is no API available for Daggerheart content, which is why I thoght it might help me and other friends of the game. Plus i wanted an excuse to combine two of my hobbies DH and Programming. 
