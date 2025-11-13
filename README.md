@@ -1,24 +1,29 @@
 # DHAPI
-This is a work in progress API for Daggerheats SRD content. 
+DHAPI is a Daggerheart a Botscirpt for Discord that allows you to get information about Daggerheart and even create new Character Sheets. 
 
-# Current Development step
-- [ ] Extract all SRD information and compile it into useful information
-- [ ] Learn FastAPI to create the API
-- [ ] Create Differennt Endpoints for all the Content
-- [ ] Other magical challanges which will rise as soon as I notice them.
+# Current Features
+- Display currently available offical cards (void cards to be added in the future (Dread and Blood Domain not available))
+- Learn more about the different Daggerheart Domain cards
+- Access all currently availabnle Void Content in PDF from Directly from Discord
+- Create a new Character sheet within Discord and Download it. 
 
-# Potential Features
-- Access information about different CARDs
-- Differen Advesaries
-- Rules
+# Future Features
+- Adverseries Statblocks
+- Encouter Planner
+- NPC Generator
 
 # How to use this Project:
-1. Visit https://www.daggerheart.com/srd/ and get the Daggerheart SRD by clicking on  DOWNLOAD THE DAGGERHEART SRD and put the downloaded document into the root of this project.
-2. Do something
+When the Bot Starts it fetches current available information form different sources such as https://www.daggerheart.com/srd/, [orthling](https://www.reddit.com/user/orthling/)'s [google-sheet](https://docs.google.com/spreadsheets/d/1cIoBHAvvuScHrAUnwjGvd-2AxfgsLamWCtx-5x7YYGo/edit?gid=1820067966#gid=1820067966), https://cardcreator.daggerheart.com and, https://www.daggerheart.com/thevoid/
+
+When everything is downloaded the bot has the following functions:
+
+- !card <CARDNAME>  --> Dispalys an available card     
+- !domain <None> | <DOMAINNAME> | <DOMAINCARDNAME> --> Provides information on the avialbale Domains, the available Cards per Domain or displays a domaincard in the chat 
+- !newchar <NAME> | <CLASS> | <SUBCLASS> | <COMMUNITY> | <ANCESTRY> --> Creates a new charactersheet with all information filled in based on given inputs
+- !void <None> --> Provides Downloadable PDFs to the content available on "The Void"
 
 # How this project was created
-I realized that there is no API available for Daggerheart content, which is why I thoght it might help me and other friends of the game. Plus i wanted an excuse to combine two of my hobbies DH and Programming.
+I realized that there is no API available for Daggerheart content, which is why I thoght it might help me and other friends of the game. Plus i wanted an excuse to combine two of my hobbies DH and Programming. 
 
 # License
-
 This product includes materials from the Daggerheart System Reference Document 1.0, © Critical Role, LLC. under the terms of the Darrington Press Community Gaming (DPCGL) License. More information can be found at  https://www.daggerheart.com. There are no previous modifications by others. 

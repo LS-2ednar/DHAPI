@@ -225,7 +225,7 @@ async def card(ctx, *args):
         await ctx.send(img)
         await ctx.send(text)
 
-@bot.command(help="Creates a new character pdf file", description="available parameters are: <NAME>, <CLASS>, <COMMUNITY>, <ANCESTRY>, <CLASS>, <SUBCLASS> seperate the parameters by comma")
+@bot.command(help="Creates a new character pdf file", description="available parameters are: <NAME>, <LEVEL>, <CLASS>, <COMMUNITY>, <ANCESTRY>, <CLASS>, <SUBCLASS> seperate the parameters by comma. Example: !newchar Name=Ribba, Class=Wizard, Level=3, SUBCLASS=School of War")
 async def newchar(ctx, *args):
 
     data = {
@@ -254,6 +254,15 @@ async def newchar(ctx, *args):
     arguments_raw = " ".join(args)
     argument_pairs = arguments_raw.lower().split(",")
     heritage_l = ['','']
+    features = ['','','','']
+    """
+    Sorting arguments to avoid wrong number of features added -> ensure level is checked first!!!
+    """
+    sorting_element = "level"
+    for i, s in enumerate(argument_pairs):
+        if sorting_element in s:
+            argument_pairs.insert(0,argument_pairs.pop(i))
+
 
     for argument in argument_pairs:
 
@@ -275,7 +284,7 @@ async def newchar(ctx, *args):
             data["evasion"] = str(df_card["Starting Evasion"][idx])
             data["maxHP"] = str(df_card["Starting HP"][idx])
             data["hopefeature"] = df_card["Hope Feature"][idx] 
-            data["classfeatures"] = df_card["Class Features"][idx]
+            features[0] = df_card["Class Features"][idx]
             data["questions"] = df_card["Questions"][idx]
             data["connections"] = df_card["Connections"][idx]
             data["domain1"] = df_card["Domain_1"][idx]
@@ -358,8 +367,21 @@ async def newchar(ctx, *args):
                 data["knowledge"] = "+2"
             
         if "subclass" in argument:
-            data["subclass"] = argument.split("=")[1].strip().title()
+            mask = df_subclasses["Subclass"] == argument.split("=")[1].strip().title()
+            df_card = df_subclasses.loc[mask]
+            idx = df_card.index[0]
 
+            data["subclass"] = argument.split("=")[1].strip().title()
+            features[1] = f'{df_card["Foundation Features"][idx]}'
+            if int(data["level"]) >= 5:
+                features[2] = f'{df_card["Specialization Features"][idx]}'
+            if int(data["level"]) >= 8:
+                features[2] = f'{df_card["Mastery Features"][idx]}'
+
+        if "level" in argument:
+            data["level"] = argument.split("=")[1].strip().title()
+
+    data["classfeatures"] = "\n".join(features)
     data["heritage"] = f'{heritage_l[0]} | {heritage_l[1]}'
     char_file = new_char(data)
     user = ctx.author 
