@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 import os
 import requests
 import tempfile
-from utils.extract_DaggerHeart_Database_sheets import get_void_content, extract_domains, extract_abilities, extract_classes, extract_subclasses, extract_ancestries, extract_communities
-from utils.character_creator import new_char
+from utils.extract_DaggerHeart_Database_sheets import get_void_content, void_exctraction, extract_domains, extract_abilities, extract_classes, extract_subclasses, extract_ancestries, extract_communities
+from utils.character_creator import new_char, character_data
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -126,13 +126,13 @@ async def void(ctx):
         except Exception as e:
             await ctx.send(f"❌ Error downloading {url}: {e}", delete_after=30)
 
-@bot.command(help="Displays Domain infromation", description=f"Please try: {bot.command_prefix}domain class | {bot.command_prefix}domain DOMAINNAME | {bot.command_prefix}domain card CARDNAME")
+@bot.command(name="domain", aliases=["domains"],help="Displays Domain infromation", description=f"Please try: {bot.command_prefix}domain class | {bot.command_prefix}domain DOMAINNAME | {bot.command_prefix}domain card CARDNAME")
 async def domain(ctx, *args): 
     arguments = ' '.join(args).lower()
     if len(args) == 0:
         df = extract_domains()
         text = "\n".join(df["Domain"])
-        await ctx.send(f'Available Domains are:\n{text}')
+        await ctx.send(f'Available Domains are:\n\n{text}')
 
     if len(args) == 1:
         try:
@@ -225,36 +225,12 @@ async def card(ctx, *args):
         await ctx.send(img)
         await ctx.send(text)
 
-@bot.command(help="Creates a new character pdf file", description="available parameters are: <NAME>, <LEVEL>, <CLASS>, <COMMUNITY>, <ANCESTRY>, <CLASS>, <SUBCLASS> seperate the parameters by comma. Example: !newchar Name=Ribba, Class=Wizard, Level=3, SUBCLASS=School of War")
+@bot.command(name="newchar", aliases=["createchar","create_char","new_char","nchar","cchar"], help="Creates a new character pdf file", description="available parameters are: <NAME>, <LEVEL>, <CLASS>, <COMMUNITY>, <ANCESTRY>, <CLASS>, <SUBCLASS> seperate the parameters by comma. Example: !newchar Name=Ribba, Class=Wizard, Level=3, SUBCLASS=School of War")
 async def newchar(ctx, *args):
-
-    data = {
-        'charname':'',
-        'heritage':'',
-        'class':'',
-        'subclass':'',
-        'agility':'', 
-        'strength':'',  
-        'finesse':'', 
-        'instinct':'', 
-        'presence':'', 
-        'knowledge':'', 
-        'evasion':'',
-        'maxHP':'',
-        'maxStress':'6',
-        'hopefeature':'',
-        'classfeatures':'',
-        'questions':'',
-        'connections':'',
-        'domain1':'',
-        'domain2':'',
-        'level':'1'
-    }
 
     arguments_raw = " ".join(args)
     argument_pairs = arguments_raw.lower().split(",")
-    heritage_l = ['','']
-    features = ['','','','']
+
     """
     Sorting arguments to avoid wrong number of features added -> ensure level is checked first!!!
     """
@@ -263,128 +239,10 @@ async def newchar(ctx, *args):
         if sorting_element in s:
             argument_pairs.insert(0,argument_pairs.pop(i))
 
-
-    for argument in argument_pairs:
-
-        if "name" in argument:
-            data["charname"] = argument.split("=")[1].strip().title()
-
-        if "ancestry" in argument:
-            heritage_l[0] = argument.split("=")[1].strip().title()
-
-        if "community" in argument:
-            heritage_l[1] = argument.split("=")[1].strip().title()
-
-        if "class" in argument and "subclass" not in argument:
-            mask = df_classes["Class"] == argument.split("=")[1].strip().title()
-            df_card = df_classes.loc[mask]
-            idx = df_card.index[0]
-
-            data["class"] = argument.split("=")[1].strip().title()
-            data["evasion"] = str(df_card["Starting Evasion"][idx])
-            data["maxHP"] = str(df_card["Starting HP"][idx])
-            data["hopefeature"] = df_card["Hope Feature"][idx] 
-            features[0] = df_card["Class Features"][idx]
-            data["questions"] = df_card["Questions"][idx]
-            data["connections"] = df_card["Connections"][idx]
-            data["domain1"] = df_card["Domain_1"][idx]
-            data["domain2"] = df_card["Domain_2"][idx]
-
-            """
-            Check the recommended values for agility, strength, finesse, instinct, presence, knowledge 
-            This section might be updated in the future to ensure it works more efficient.
-            """
-            if argument.split("=")[1].strip().title() == "Bard":
-                data["agility"] = "0"
-                data["strength"] = "-1"
-                data["finesse"] = "+1"
-                data["instinct"] = "0"
-                data["presence"] = "+2"
-                data["knowledge"] = "+1"
-
-            if argument.split("=")[1].strip().title() == "Druid":
-                data["agility"] = "+1"
-                data["strength"] = "0"
-                data["finesse"] = "+1"
-                data["instinct"] = "+2"
-                data["presence"] = "-1"
-                data["knowledge"] = "0"
-
-            if argument.split("=")[1].strip().title() == "Guardian":
-                data["agility"] = "+1"
-                data["strength"] = "+2"
-                data["finesse"] = "-1"
-                data["instinct"] = "0"
-                data["presence"] = "+1"
-                data["knowledge"] = "0"
-
-            if argument.split("=")[1].strip().title() == "Ranger":
-                data["agility"] = "+2"
-                data["strength"] = "0"
-                data["finesse"] = "+1"
-                data["instinct"] = "+1"
-                data["presence"] = "-1"
-                data["knowledge"] = "0"
-
-            if argument.split("=")[1].strip().title() == "Rogue":
-                data["agility"] = "+1"
-                data["strength"] = "-1"
-                data["finesse"] = "+2"
-                data["instinct"] = "0"
-                data["presence"] = "+1"
-                data["knowledge"] = "0"
-
-            if argument.split("=")[1].strip().title() == "Seraph":
-                data["agility"] = "0"
-                data["strength"] = "+2"
-                data["finesse"] = "0"
-                data["instinct"] = "+1"
-                data["presence"] = "+1"
-                data["knowledge"] = "-1"
-
-            if argument.split("=")[1].strip().title() == "Sorcerer":
-                data["agility"] = "0"
-                data["strength"] = "-1"
-                data["finesse"] = "+1"
-                data["instinct"] = "+2"
-                data["presence"] = "+1"
-                data["knowledge"] = "0"
-
-            if argument.split("=")[1].strip().title() == "Warrior":
-                data["agility"] = "+2"
-                data["strength"] = "+1"
-                data["finesse"] = "0"
-                data["instinct"] = "+1"
-                data["presence"] = "-1"
-                data["knowledge"] = "0"
-
-            if argument.split("=")[1].strip().title() == "Wizard":
-                data["agility"] = "-1"
-                data["strength"] = "0"
-                data["finesse"] = "0"
-                data["instinct"] = "+1"
-                data["presence"] = "+1"
-                data["knowledge"] = "+2"
-            
-        if "subclass" in argument:
-            mask = df_subclasses["Subclass"] == argument.split("=")[1].strip().title()
-            df_card = df_subclasses.loc[mask]
-            idx = df_card.index[0]
-
-            data["subclass"] = argument.split("=")[1].strip().title()
-            features[1] = f'{df_card["Foundation Features"][idx]}'
-            if int(data["level"]) >= 5:
-                features[2] = f'{df_card["Specialization Features"][idx]}'
-            if int(data["level"]) >= 8:
-                features[2] = f'{df_card["Mastery Features"][idx]}'
-
-        if "level" in argument:
-            data["level"] = argument.split("=")[1].strip().title()
-
-    data["classfeatures"] = "\n".join(features)
-    data["heritage"] = f'{heritage_l[0]} | {heritage_l[1]}'
+    data = character_data(argument_pairs,df_classes, df_subclasses)
     char_file = new_char(data)
-    user = ctx.author 
+    user = ctx.author
+
     try:
         await ctx.send(
             content=f"Hey {user.name} here is your new charactersheet.\n\nNOTE\n\nThis is still a work in progress. Check your Evasion and stress values",
@@ -392,13 +250,13 @@ async def newchar(ctx, *args):
     except:
         pass
 
-@bot.command(help="Returns available Subclasses", description=f"{bot.command_prefix}subclasses | {bot.command_prefix}subclasses SUBCLASSNAME")
+@bot.command(name="subclasses", aliases=["subclass"], help="Returns available Subclasses", description=f"{bot.command_prefix}subclasses | {bot.command_prefix}subclasses SUBCLASSNAME")
 async def subclasses(ctx, *args):
     subclassname = ' '.join(args).lower()
 
     if not subclassname:
         text = "\n".join(df_subclasses["Subclass"].astype(str))
-        await ctx.send(f'Available Subclasses are:\n{text}')
+        await ctx.send(f'Available Subclasses are:\n\n{text}')
         return
 
     mask = df_subclasses["Subclass"].astype(str).str.lower().eq(subclassname)
@@ -409,16 +267,19 @@ async def subclasses(ctx, *args):
     
     df_card = df_subclasses.loc[mask]
     row = df_card.iloc[0]
-    msg = "\n".join([f"{col}: {row[col]}" for col in df_subclasses.columns])
-    
-    #msg = f"{row["Subclass"]}"
-
+    msg = f'{row["Description"]}\n\n**Spellcast Ability: **{row["Spellcast Ability"]}\n\n**Foundation Features: (Statring from level 2)**\n{row["Foundation Features"]}\n\n**Specialization Features: (Starting from level 5)**\n{row["Specialization Features"]}\n\n**Mastery Features: (Starting from level 8)**\n{row["Mastery Features"]}'
     img = f'[{subclassname}]({row["URL"]})'
     
+    await ctx.send(f"**Subclass: {subclassname.title()}**\nClass: {row['Class']}\n")
     await ctx.send(img)
-    await ctx.send(msg)
+    await ctx.send(msg) 
     return
-    
+
+@bot.command(help="Returns available Subclasses", description=f"{bot.command_prefix}add_void ")
+async def add_void(ctx, *args):
+    void_exctraction()
+
+
 """
 Run the Bot
 """

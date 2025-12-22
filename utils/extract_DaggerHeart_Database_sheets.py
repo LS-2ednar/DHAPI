@@ -98,29 +98,6 @@ def extract_csv_from_google_sheet(gid):
     df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}")   
     return df
 
-def get_void_content():
-    url = "https://www.daggerheart.com/thevoid/"
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/115.0 Safari/537.36"
-        )
-    }
-    response = requests.get(url, headers=headers, timeout=15)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, "html.parser")
-    hrefs = []
-    for a_tag in soup.find_all("a", href=True):
-        href = a_tag["href"].strip()
-        if "wp-content" in href:
-            hrefs.append(href)
-    content = [href.split("/")[-1].split("-v")[0] for href in hrefs]
-    version = [href.split("/")[-1].split("-v")[1].split("-")[0] for href in hrefs]
-    data = {"Content Type":content, "Version":version,"URL":hrefs}
-    df = pd.DataFrame(data=data)
-    return df
-
 def add_artist_and_image_url(df):
     URL, Artist = [], []
     response = requests.get("https://cardcreator.daggerheart.com/api/templates")
@@ -156,3 +133,31 @@ def add_artist_and_image_url(df):
         pass
     df["URL"] = URL
     return df
+
+def get_void_content():
+    url = "https://www.daggerheart.com/thevoid/"
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/115.0 Safari/537.36"
+        )
+    }
+    response = requests.get(url, headers=headers, timeout=15)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+    hrefs = []
+    for a_tag in soup.find_all("a", href=True):
+        href = a_tag["href"].strip()
+        if "wp-content" in href:
+            hrefs.append(href)
+    content = [href.split("/")[-1].split("-v")[0] for href in hrefs]
+    version = [href.split("/")[-1].split("-v")[1].split("-")[0] for href in hrefs]
+    data = {"Content Type":content, "Version":version,"URL":hrefs}
+    df = pd.DataFrame(data=data)
+    return df
+
+def void_exctraction():
+    df_void = get_void_content()
+    for _, content in df_void.iterrows():
+        print(content)
