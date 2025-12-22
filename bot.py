@@ -33,7 +33,7 @@ async def on_ready():
     try:
         global df_domaincards 
         df_domaincards = extract_abilities()
-        print("loaded: Domaincards")
+        print("Loaded: Domaincards")
     except:
         print("Could not load Domaincards")
         pass
@@ -41,7 +41,7 @@ async def on_ready():
     try:
         global df_classes
         df_classes = extract_classes()
-        print("loaded: Classes")
+        print("Loaded: Classes")
     except:
         print("Could not load Classcards")
         pass
@@ -49,7 +49,7 @@ async def on_ready():
     try:
         global df_subclasses
         df_subclasses = extract_subclasses()
-        print("loaded: Subclasses")
+        print("Loaded: Subclasses")
     except:
         print("Could not load Subclassescards")
         pass
@@ -57,7 +57,7 @@ async def on_ready():
     try:
         global df_ancestries
         df_ancestries = extract_ancestries()
-        print("loaded: Ancestries")
+        print("Loaded: Ancestries")
     except:
         print("Could not load Ancestriescards")
         pass
@@ -65,7 +65,7 @@ async def on_ready():
     try:
         global df_communities
         df_communities = extract_communities()
-        print("loaded: Communities")
+        print("Loaded: Communities")
     except:
         print("Could not load Communitycards")
 
@@ -391,6 +391,33 @@ async def newchar(ctx, *args):
             file=discord.File(char_file))
     except:
         pass
+
+@bot.command(help="Returns available Subclasses", description=f"{bot.command_prefix}subclasses | {bot.command_prefix}subclasses SUBCLASSNAME")
+async def subclasses(ctx, *args):
+    subclassname = ' '.join(args).lower()
+
+    if not subclassname:
+        text = "\n".join(df_subclasses["Subclass"].astype(str))
+        await ctx.send(f'Available Subclasses are:\n{text}')
+        return
+
+    mask = df_subclasses["Subclass"].astype(str).str.lower().eq(subclassname)
+    
+    if not mask.any():
+        await ctx.send(f"No Subclass named {subclassname} found.")
+        return
+    
+    df_card = df_subclasses.loc[mask]
+    row = df_card.iloc[0]
+    msg = "\n".join([f"{col}: {row[col]}" for col in df_subclasses.columns])
+    
+    #msg = f"{row["Subclass"]}"
+
+    img = f'[{subclassname}]({row["URL"]})'
+    
+    await ctx.send(img)
+    await ctx.send(msg)
+    return
     
 """
 Run the Bot
