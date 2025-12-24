@@ -278,6 +278,7 @@ async def subclasses(ctx, *args):
 @bot.command(help="Returns available Subclasses", description=f"{bot.command_prefix}add_void ")
 async def add_void(ctx, *args):
     void_exctraction()
+    print(df_classes.columns)
 
 
 """

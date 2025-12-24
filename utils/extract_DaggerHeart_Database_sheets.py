@@ -9,6 +9,8 @@ import pandas as pd
 import requests
 import re
 import json
+import io
+from PyPDF2 import PdfReader
 from bs4 import BeautifulSoup
 
 def extract_domains():
@@ -159,5 +161,20 @@ def get_void_content():
 
 def void_exctraction():
     df_void = get_void_content()
-    for _, content in df_void.iterrows():
-        print(content)
+    for _, row in df_void.iterrows():
+        
+        print(f'Extracting Data from: {row["URL"]}')
+        with requests.get(row["URL"],timeout=30) as req:
+            req.raise_for_status()
+            temp_pdf = io.BytesIO(req.content)
+            reader = PdfReader(temp_pdf)
+            #text = "\n".join(page.extract_text() or " " for page in reader.pages)
+            if is_class(reader):
+                #update the df_class table with the classes information -> need to do some checks on the content of the PDFs
+                print("\n\n\n")
+
+#helper functions
+def is_class(reader):
+    if "strength agility finesse instinct knowledge" in reader.pages[0].extract_text().lower():
+        print("This is a Void Class")
+        return 1
