@@ -3,11 +3,13 @@ DHAPI is a Daggerheart a Botscirpt for Discord that allows you to get informatio
 
 # Current Features
 - Display currently available offical cards (void cards to be added in the future (Dread and Blood Domain not available))
-- Learn more about the different Daggerheart Domain cards
-- Access all currently availabnle Void Content in PDF from Directly from Discord
+- Learn more about the different Daggerheart cards (Domains, Ancestries, Communities, Subclasses) and display them in Discord
+- Access all currently available Void Content in PDF from Directly from Discord
 - Create a new Character sheet within Discord and Download it. 
 
 # Future Features
+- Adding Void Classes and Subclasses
+- Rule helper 
 - Adverseries Statblocks
 - Encouter Planner
 - NPC Generator
