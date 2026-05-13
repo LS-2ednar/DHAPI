@@ -48,8 +48,8 @@ class Encounter:
     def encounter_check(self):
         self.calculate_encounterpoints()
         if self.battlepoints = self.encounterpoints:
-            print("Fair Encounter")
+            return 1
         elif self.battlepoints > self.encounterpoints:
-            print("Easy Encounter")
+            return -2
         else:
-            print("Unfair encounter")
+            return 0
