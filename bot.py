@@ -7,6 +7,7 @@ import requests
 import tempfile
 from utils.extract_DaggerHeart_Database_sheets import get_void_content, void_exctraction, extract_domains, extract_abilities, extract_classes, extract_subclasses, extract_ancestries, extract_communities
 from utils.character_creator import new_char, character_data
+from utils.encounter_planer import Adversarie, Encounter
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -225,7 +226,7 @@ async def card(ctx, *args):
         await ctx.send(img)
         await ctx.send(text)
 
-@bot.command(name="newchar", aliases=["createchar","create_char","new_char","nchar","cchar"], help="Creates a new character pdf file", description="available parameters are: <NAME>, <LEVEL>, <CLASS>, <COMMUNITY>, <ANCESTRY>, <CLASS>, <SUBCLASS> seperate the parameters by comma. Example: !newchar Name=Ribba, Class=Wizard, Level=3, SUBCLASS=School of War")
+@bot.command(name="newchar", aliases=["createchar","create_char","new_char","nchar","cchar","nc"], help="Creates a new character pdf file", description="available parameters are: <NAME>, <LEVEL>, <CLASS>, <COMMUNITY>, <ANCESTRY>, <CLASS>, <SUBCLASS> seperate the parameters by comma. Example: !newchar Name=Ribba, Class=Wizard, Level=3, SUBCLASS=School of War")
 async def newchar(ctx, *args):
 
     arguments_raw = " ".join(args)
@@ -275,11 +276,14 @@ async def subclasses(ctx, *args):
     await ctx.send(msg) 
     return
 
-@bot.command(help="Returns available Subclasses", description=f"{bot.command_prefix}add_void ")
+@bot.command(help="Returns available Content on the Void", description=f"{bot.command_prefix}add_void ")
 async def add_void(ctx, *args):
     void_exctraction()
     print(df_classes.columns)
 
+@bot.command(help="Create an Encounter and check for Fairness", description=f"{bot.command_prefix}encounter")
+async def encounter(ctx, *args):
+    pass
 
 """
 Run the Bot
