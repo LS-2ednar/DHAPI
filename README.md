@@ -9,10 +9,9 @@ DHAPI is a Daggerheart a Botscirpt for Discord that allows you to get informatio
 - Create a new Character sheet within Discord and Download it. 
 
 # Future Features
-- Adding Void Classes and Subclasses
-- Rule helper 
+- Rule helper -> Using RAG technology
 - Adverseries Statblocks
-- Encouter Planner
+- Encouter Planer -> Currently in Progress
 - NPC Generator
 
 # How to use this Project:
@@ -27,9 +26,6 @@ When everything is downloaded the bot has the following functions:
 
 # How this project was created
 I realized that there is no API available for Daggerheart content, which is why I thoght it might help me and other friends of the game. Plus i wanted an excuse to combine two of my hobbies DH and Programming. 
-
-A cool thing to add might be the option to setup encounters. 
-Logic that needs to be in place: Number of Players. Type of Encounter / Enemies or Social 
 
 # License
 This product includes materials from the Daggerheart System Reference Document 1.0, © Critical Role, LLC. under the terms of the Darrington Press Community Gaming (DPCGL) License. More information can be found at  https://www.daggerheart.com. There are no previous modifications by others. 
