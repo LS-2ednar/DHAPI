@@ -7,6 +7,9 @@ class Adversarie:
     type: str
     tier: int
 
+def create_adversarie_from_table(name):
+    pass
+
 @dataclass
 class Encounter:
     partysize: int
