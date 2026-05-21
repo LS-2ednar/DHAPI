@@ -50,7 +50,7 @@ class Encounter:
 
     def encounter_check(self):
         self.calculate_encounterpoints()
-        if self.battlepoints = self.encounterpoints:
+        if self.battlepoints == self.encounterpoints:
             return 1
         elif self.battlepoints > self.encounterpoints:
             return -2
