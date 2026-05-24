@@ -11,7 +11,9 @@ DHAPI is a Daggerheart a Botscirpt for Discord that allows you to get informatio
 # Future Features
 - Rule helper -> Using RAG technology
 - Adverseries Statblocks
-- Encouter Planer -> Currently in Progress
+- Encounter Planer -> Currently in Progress
+- Encounter Tracking -> 
+- EXP Tracker Per Playercharakter / User
 - NPC Generator
 
 # How to use this Project:
