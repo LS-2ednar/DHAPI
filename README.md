@@ -16,6 +16,7 @@ DHAPI is a Daggerheart a Botscirpt for Discord that allows you to get informatio
 - EXP Tracker Per Playercharakter / User
 - NPC Generator
 - Storing Player Settings
+- Allow Ribba to  lookup online sources.
 
 # How to use this Project:
 When the Bot Starts it fetches current available information form different sources such as https://www.daggerheart.com/srd/, [orthling](https://www.reddit.com/user/orthling/)'s [google-sheet](https://docs.google.com/spreadsheets/d/1cIoBHAvvuScHrAUnwjGvd-2AxfgsLamWCtx-5x7YYGo/edit?gid=1820067966#gid=1820067966), https://cardcreator.daggerheart.com and, https://www.daggerheart.com/thevoid/
